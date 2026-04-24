@@ -19,13 +19,14 @@ class ImageProcessor:
         """
         # Extract the parent directory of the image.
         self._image_directory: str = os.path.dirname(image_path)
+
         if colour_type not in ["BGR", "RGB", "Gray"]:
             raise ValueError("The given colour is not supported!")
-
+        
         # ToDo: Save the colour type and load the image using CV2.
         self._colour_type: str = colour_type
-        self._image: np.ndarray = np.zeros(0)
-        
+        self._image: np.ndarray = cv2.imread(image_path)        
+
         if self._image is None:
             raise FileNotFoundError(f"Image could not be loaded: {image_path}")
         
@@ -33,6 +34,9 @@ class ImageProcessor:
             self._image = cv2.cvtColor(self._image, cv2.COLOR_BGR2RGB)
         elif self._colour_type == "Gray":
             self._image = cv2.cvtColor(self._image, cv2.COLOR_BGR2GRAY)
+
+    def get_image_data(self):
+        return self._image, self._colour_type
 
     def show_image(self):
         """
@@ -83,9 +87,12 @@ class ImageProcessor:
         """
         if self._colour_type not in ["RGB", "BGR"]:
             raise ValueError("The function only works for colour images!")
+        
+        if self._image.ndim != 3:
+            raise ValueError("Dimension of image array isn't correct!")
 
         # ToDo: Perform the colour conversion.
-        self._image = self._image[:, :, ::-1]
+        self._image = self._image[:, :, [2,1,0]] # Width,Height,[R,G,B]  -> Width,Height,[B,G,R] OR Width,Height,[B,G,R]  -> Width,Height,[R,G,B]
 
         # ToDo: Update the colour type.
         if self._colour_type == "BGR":
