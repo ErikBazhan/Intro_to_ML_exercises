@@ -24,18 +24,18 @@ class ImageProcessor:
 
         # ToDo: Save the colour type and load the image using CV2.
         self._colour_type: str = colour_type
-
+        self._image: np.ndarray = np.zeros(0)
         if colour_type == "Gray":
-            self._image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-            if self._image is None:
-                raise FileNotFoundError(f"Could not load image from path: {image_path}")
-
+            img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         else:
-            self._image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-            if self._image is None:
-                raise FileNotFoundError(f"Could not load image from path: {image_path}")
-            if colour_type == "RGB":
-                self._image = self._image[:, :, ::-1]
+            img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+
+        if img is None:
+            raise FileNotFoundError(f"Could not load image from path: {image_path}")
+
+        self._image = img
+        if colour_type == "RGB":
+            self._image = self._image[:, :, ::-1]
 
     def get_image_data(self):
         return self._image, self._colour_type
@@ -50,7 +50,8 @@ class ImageProcessor:
 
         if self._colour_type == "RGB":
             image_to_show = self._image[:, :, ::-1]
-
+        if image_to_show is None:
+            raise ValueError("No image loaded to save.")
         cv2.imshow("Image", image_to_show)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -70,7 +71,8 @@ class ImageProcessor:
 
         if self._colour_type == "RGB":
             image_to_save = self._image[:, :, ::-1]
-
+        if image_to_save is None:
+            raise ValueError("No image loaded to save.")
         success = cv2.imwrite(total_image_path, image_to_save)
         if not success:
             raise IOError(f"Could not save image to: {total_image_path}")
