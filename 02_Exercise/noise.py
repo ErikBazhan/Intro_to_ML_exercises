@@ -21,24 +21,58 @@ def add_gaussian_noise(image: np.ndarray, mean: float = 0.0, sigma: float = 10.0
     # ToDo: Generate gaussian noise and add it to the image.
     # ToDo: Hint: Look at the options among np.random to generate the noise.
     # ToDo: Hint: Don't forget to clip the values.
+    noise = np.random.normal(mean, sigma, image.shape)
+    noisy = image.astype(np.float32) + noise
+    image = np.clip(noisy, 0, 255).astype(np.uint8)
     return image
 
 
 def add_salt_and_pepper_noise(image: np.ndarray, salt_prob: float = 0.01, pepper_prob: float = 0.01) -> np.ndarray:
     # ToDo: Generate random salt and pepper noise based on the provided probabilities.
     # ToDo: Hint: Look at the options among np.random to generate the noise.
+    if salt_prob < 0 or pepper_prob < 0 or salt_prob + pepper_prob > 1:
+        raise ValueError(
+            "salt_prob und pepper_prob müssen >= 0 sein und zusammen <= 1."
+        )
+
+    noisy = image.copy()
+
+    if image.ndim == 3:
+        # Für Farbbilder: ein Zufallswert pro Pixel
+        mask = np.random.random(image.shape[:2])
+
+        pepper_mask = mask < pepper_prob
+        salt_mask = mask > 1 - salt_prob
+
+        noisy[pepper_mask] = 0
+        noisy[salt_mask] = 255
+    else:
+        # Für Graustufenbilder
+        mask = np.random.random(image.shape)
+
+        noisy[mask < pepper_prob] = 0
+        noisy[mask > 1 - salt_prob] = 255
+    image = noisy.astype(np.uint8)
     return image
 
 
 def add_poisson_noise(image: np.ndarray) -> np.ndarray:
     # ToDo: Add poisson noise to the image.
     # ToDo: Hint: Look at the options among np.random to generate the noise.
+    image_float = image.astype(np.float32)
+    image_float = np.clip(image_float, 0, 255)
+
+    noisy = np.random.poisson(image_float)
+    image = np.clip(noisy, 0, 255).astype(np.uint8)
     return image
 
 
 def add_uniform_noise(image: np.ndarray, low: float = -20.0, high: float = 20.0) -> np.ndarray:
     # ToDo: Add uniform noise to the image, which is sampled uniformly from the available values.
     # ToDo: Hint: Look at the options among np.random to generate the noise.
+    noise = np.random.uniform(low, high, image.shape)
+    noisy = image.astype(np.float32) + noise
+    image = np.clip(noisy, 0, 255).astype(np.uint8)
     return image
 
 
