@@ -45,7 +45,7 @@ class ImageProcessor:
 
         # ToDo: Show the image depending on the colour type.
         if self._colour_type == "BGR":
-            plt.imshow(cv2.cvtColor(self._image, cv2.COLOR_BGR2RGB))
+            plt.imshow(cv2.cvtColor(self._image, cv2.COLOR_BGR2RGB)) # Matplotlib expects RGB
         elif self._colour_type == "RGB":
             plt.imshow(self._image)
         elif self._colour_type == "Gray":
@@ -74,7 +74,7 @@ class ImageProcessor:
         else:
             image_to_save = self._image
 
-        image_saved = cv2.imwrite(total_image_path, image_to_save)
+        image_saved = cv2.imwrite(total_image_path, image_to_save) # cv2 expects BGR
 
         if not image_saved:
             raise IOError(f"Image could not be saved: {total_image_path}")

@@ -14,15 +14,15 @@ def load_image(path: str) -> np.ndarray:
 def compute_histogram(image: np.ndarray) -> np.ndarray:
     """Compute a grayscale histogram with 256 bins."""
     # ToDo: Implement actual histogram calculation.
-    histogram = np.zeros(0)
+    histogram = np.np.zeros(0)
     return histogram
 
 
 def p_helper(prob: np.ndarray, theta: int) -> tuple[float, float]:
     """Compute class probabilities p0 and p1 for threshold theta."""
     # ToDo: Implement actual probability computation.
-    p0 = 0.0
-    p1 = 0.0
+    p0 = 0.0 # Sum of class 0 appearance in the histogram
+    p1 = 0.0 # Sum of class 1 appearance in the histogram
     return p0, p1
 
 

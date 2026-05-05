@@ -4,7 +4,7 @@ import numpy as np
 import unittest
 from PIL import Image
 from unittest import TestCase
-from ex0 import IMAGE_PATH, ImageProcessor
+from ex0_solution_Erik import IMAGE_PATH, ImageProcessor
 
 IMAGE_PARENT_DIRECTORY: str = os.path.dirname(IMAGE_PATH)
 
