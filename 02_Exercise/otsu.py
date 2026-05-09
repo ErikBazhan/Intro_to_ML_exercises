@@ -3,6 +3,8 @@ import cv2
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+from fontTools.misc.bezierTools import epsilon
+
 
 def load_image(path: str) -> np.ndarray:
     loaded_image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -14,15 +16,17 @@ def load_image(path: str) -> np.ndarray:
 def compute_histogram(image: np.ndarray) -> np.ndarray:
     """Compute a grayscale histogram with 256 bins."""
     # ToDo: Implement actual histogram calculation.
-    histogram = np.np.zeros(0)
+    histogram = np.zeros(256, dtype=int)
+    for p in image.flatten():
+        histogram[p] += 1
     return histogram
 
 
 def p_helper(prob: np.ndarray, theta: int) -> tuple[float, float]:
     """Compute class probabilities p0 and p1 for threshold theta."""
     # ToDo: Implement actual probability computation.
-    p0 = 0.0 # Sum of class 0 appearance in the histogram
-    p1 = 0.0 # Sum of class 1 appearance in the histogram
+    p0 = np.sum(prob[:theta + 1])
+    p1 = np.sum(prob[theta + 1:])
     return p0, p1
 
 
@@ -31,6 +35,15 @@ def mu_helper(prob: np.ndarray, theta: int, p0: float, p1: float) -> tuple[float
     # ToDo: Implement actual mean computation.
     mu0 = 0.0
     mu1 = 0.0
+    for i in range(0, theta + 1):
+        mu0 += prob[i] * i
+    for i in range(theta + 1, len(prob)):
+        mu1 += prob[i] * i
+    if p0 != 0:
+        mu0 /= p0
+    if p1 != 0:
+        mu1 /= p1
+
     return mu0, mu1
 
 
@@ -40,14 +53,24 @@ def otsu_threshold(histogram: np.ndarray) -> int:
     prob = histogram.astype(np.float64)  # later normalize
     max_variance = 0.0
     best_threshold = 0
+
+    for theta in range(0, 255):
+        p0, p1 = p_helper(prob, theta)
+        mu0, mu1 = mu_helper(prob, theta, p0, p1)
+        mu_total = p0 * mu0 + p1 * mu1
+        ep = p0 * (mu0 - mu_total)**2 + p1 * (mu1 - mu_total)**2
+        if ep > max_variance:
+            max_variance = ep
+            best_threshold = theta
+
     return int(best_threshold)
 
 
 def otsu_binarize(image: np.ndarray) -> tuple[np.ndarray, int]:
     """Binarize an image using Otsu's threshold."""
     # ToDo: Combine the helper functions to produce the binarized image.
-    theta = 0
-    binarized = np.zeros(0)
+    theta = otsu_threshold(compute_histogram(image))
+    binarized = (image > theta).astype(np.uint8) * 255
     return binarized, theta
 
 

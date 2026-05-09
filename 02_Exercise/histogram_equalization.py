@@ -16,22 +16,30 @@ def compute_histogram(image: np.ndarray) -> np.ndarray:
     # ToDo: Create a histogram for the given image (256 values).
     # ToDo: Don't use functions like np.histogram.
     # ToDo: It is easier if you flatten your image first.
-    histogram = np.zeros(0)
+    histogram = np.zeros(256, dtype=int)
+    for p in image.flatten():
+        histogram[p] += 1
     return histogram
 
 
 def compute_cdf(histogram: np.ndarray) -> np.ndarray:
     # ToDo: Compute the CDF.
     # ToDo: Don't forget to normalize it (turn it into a distribution).
-    cdf = np.zeros(0)
-    return cdf
+    cdf = np.zeros(len(histogram), dtype=float)
+    c_sum = 0
+    for i in range(len(histogram)):
+        c_sum += histogram[i]
+        cdf[i] = c_sum
+    return cdf / cdf[-1]
 
 
 def equalize_image(image: np.ndarray, cdf: np.ndarray) -> np.ndarray:
     # ToDo: Apply histogram equalization to the given image.
     # ToDo: Hint: Flatten the image first and reshape it again in the end.
-    equalized_image = np.zeros(0)
-    return equalized_image
+    image_f = image.flatten()
+    c_min = np.min(cdf)
+    equalized_image = np.floor(((cdf[image_f]-c_min) / (1-c_min))*255 )
+    return equalized_image.astype(np.uint8).reshape(image.shape)
 
 
 def save_image(image: np.ndarray, path: str) -> None:
