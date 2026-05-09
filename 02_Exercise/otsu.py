@@ -71,6 +71,7 @@ def otsu_binarize(image: np.ndarray) -> tuple[np.ndarray, int]:
     # ToDo: Combine the helper functions to produce the binarized image.
     theta = otsu_threshold(compute_histogram(image))
     binarized = (image > theta).astype(np.uint8) * 255
+
     return binarized, theta
 
 
