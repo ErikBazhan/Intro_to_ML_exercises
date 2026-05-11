@@ -29,10 +29,12 @@ def compute_histogram(image: np.ndarray) -> np.ndarray:
 def compute_cdf(histogram: np.ndarray) -> np.ndarray:
     # ToDo: Compute the CDF.
     # ToDo: Don't forget to normalize it (turn it into a distribution).
-    cdf = np.cumsum(histogram)
-    cdf = cdf / cdf[-1]
-
-    return cdf
+    cdf = np.zeros(len(histogram), dtype=float)
+    c_sum = 0
+    for i in range(len(histogram)):
+        c_sum += histogram[i]
+        cdf[i] = c_sum
+    return cdf / cdf[-1]
 
 
 def equalize_image(image: np.ndarray, cdf: np.ndarray) -> np.ndarray:
@@ -44,7 +46,7 @@ def equalize_image(image: np.ndarray, cdf: np.ndarray) -> np.ndarray:
 
     equalized_flat = ((cdf[flat_image] - cdf_min) / (1 - cdf_min)) * 255
 
-    equalized_flat = np.round(equalized_flat).astype(np.uint8)
+    equalized_flat = np.floor(equalized_flat).astype(np.uint8)
 
     equalized_image = equalized_flat.reshape(image.shape)
     
@@ -96,3 +98,6 @@ if __name__ == '__main__':
     if Path(output_image_path).exists():
         equalized = load_image(output_image_path)
         show_images(original, equalized)
+
+# f) The backround changes because the Histogram Equalization tries to distribute the pixel values evenly over the whole histogram (0 - 255).
+#       Because of that small pixel values will be amplified and the discrete bins are more visible than before.  
