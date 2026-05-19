@@ -32,13 +32,13 @@ def add_salt_and_pepper_noise(image: np.ndarray, salt_prob: float = 0.01, pepper
     # ToDo: Hint: Look at the options among np.random to generate the noise.
     if salt_prob < 0 or pepper_prob < 0 or salt_prob + pepper_prob > 1:
         raise ValueError(
-            "salt_prob und pepper_prob müssen >= 0 sein und zusammen <= 1."
+            "salt_prob and pepper_prob must be >= 0 and <= 1."
         )
 
     noisy = image.copy()
 
     if image.ndim == 3:
-        # Für Farbbilder: ein Zufallswert pro Pixel
+        # For colour image: Random value per pixel
         mask = np.random.random(image.shape[:2])
 
         pepper_mask = mask < pepper_prob
@@ -47,7 +47,7 @@ def add_salt_and_pepper_noise(image: np.ndarray, salt_prob: float = 0.01, pepper
         noisy[pepper_mask] = 0
         noisy[salt_mask] = 255
     else:
-        # Für Graustufenbilder
+        # For grayscale
         mask = np.random.random(image.shape)
 
         noisy[mask < pepper_prob] = 0
