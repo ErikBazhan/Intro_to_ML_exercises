@@ -7,7 +7,11 @@ def extract_region(padded_image: np.ndarray, center_row: int, center_col: int, w
     # The function receives a padded image (pad_image) and the current pixel of our padded image.
     # ToDo: Return the surrounding area around that center pixel with the given size (window_size).
     # ToDo: Use slicing.
-    return np.zeros((window_size, window_size))
+    half = window_size // 2
+    return padded_image[
+        center_row - half : center_row + half + 1,
+        center_col - half : center_col + half + 1,
+    ]
 
 
 def pad_image(image: np.ndarray, padding_size: int) -> np.ndarray:
@@ -22,11 +26,25 @@ def erode_binary(image: np.ndarray, structuring_element: np.ndarray) -> np.ndarr
     assert se_size % 2 == 1, "SE size must be uneven."
 
     # ToDo: Create the padded image and an empty output image that can be filled later.
+    padding_size = se_size // 2
+    padded_image = pad_image(image, padding_size)
     output = np.zeros_like(image)
+    active_positions = structuring_element.astype(bool)
 
     # ToDo: Iterate over the provided image and perform erosion around each pixel.
     # ToDo: Hint: Use the extract_region function to get the area around each pixel.
     # ToDo: Hint: Don't forget that the extract region function receives the padded image and the corresponding centers.
+    for row in range(image.shape[0]):
+        for col in range(image.shape[1]):
+            region = extract_region(
+                padded_image,
+                row + padding_size,
+                col + padding_size,
+                se_size,
+            )
+
+            if np.all(region[active_positions] == 1):
+                output[row, col] = 1
     return output
 
 
@@ -37,11 +55,26 @@ def dilate_binary(image: np.ndarray, structuring_element: np.ndarray) -> np.ndar
     assert se_size % 2 == 1, "SE size must be uneven."
 
     # ToDo: Create the padded image and an empty output image that can be filled later.
+    padding_size = se_size // 2
+    padded_image = pad_image(image, padding_size)
     output = np.zeros_like(image)
+
+    active_positions = structuring_element.astype(bool)
 
     # ToDo: Iterate over the provided image and perform dilation around each pixel.
     # ToDo: Hint: Use the extract_region function to get the area around each pixel.
     # ToDo: Hint: Don't forget that the extract region function receives the padded image and the corresponding centers.
+    for row in range(image.shape[0]):
+        for col in range(image.shape[1]):
+            region = extract_region(
+                padded_image,
+                row + padding_size,
+                col + padding_size,
+                se_size,
+            )
+
+            if np.any(region[active_positions] == 1):
+                output[row, col] = 1
     return output
 
 
@@ -49,12 +82,20 @@ def open_binary(input_image: np.ndarray, structuring_element: np.ndarray, iterat
     # ToDo: Perform opening (erosion followed by dilation).
     result = input_image.copy()
 
+    for _ in range(iterations):
+        result = erode_binary(result, structuring_element)
+        result = dilate_binary(result, structuring_element)
+
     return result
 
 
 def close_binary(input_image: np.ndarray, structuring_element: np.ndarray, iterations: int = 1) -> np.ndarray:
     # ToDo: Perform closing (dilation followed by erosion).
     result = input_image.copy()
+
+    for _ in range(iterations):
+        result = dilate_binary(result, structuring_element)
+        result = erode_binary(result, structuring_element)
 
     return result
 
