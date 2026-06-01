@@ -21,7 +21,7 @@ def pad_image(image: np.ndarray, padding_size: int) -> np.ndarray:
 
 def erode_binary(image: np.ndarray, structuring_element: np.ndarray) -> np.ndarray:
     # Apply erosion on the given image using the structuring element.
-    se_size = structuring_element.shape[0]
+    se_size = structuring_element.shape[0] # mask filled with 1s
     assert se_size == structuring_element.shape[1], "SE must be quadratic."
     assert se_size % 2 == 1, "SE size must be uneven."
 
@@ -137,12 +137,25 @@ if __name__ == '__main__':
 
     # Erosion.
     # ToDo: Perform erosion multiple times until the circles separate from each other.
-    eroded = erode_binary(erosion_input, SE)
+    eroded = erosion_input.copy()
+    for _ in range(4):
+        eroded = erode_binary(eroded, SE)
+
     save_binary(eroded, erosion_out_path)
     show_image(eroded, "Erosion Output")
 
     # Dilation.
     # ToDo: Perform dilation multiple times until the hole closes.
-    dilated = dilate_binary(dilation_input, SE)
+    dilated = dilation_input.copy()
+    for _ in range(8):
+        dilated = dilate_binary(dilated, SE)
+
     save_binary(dilated, dilation_out_path)
     show_image(dilated, "Dilation Output")
+
+
+    # The size of the structuring element controls the strength of the
+    # morphological operation. A larger structuring element causes stronger
+    # erosion/dilation: objects shrink or grow more, small connections are removed
+    # more easily, and holes/gaps are closed faster. A smaller structuring element
+    # preserves more fine details and changes the image less.

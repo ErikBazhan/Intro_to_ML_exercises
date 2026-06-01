@@ -22,7 +22,7 @@ def gaussFilter(img_in, ksize, sigma):
 
     # Convert input to float for safe computation
     arr = np.asarray(img_in, dtype=np.float64)
-    filtered = convolve(arr, kernel, mode="reflect").astype(int)
+    filtered = convolve(arr, kernel, mode="reflect").astype(int) # reflecting edge values of image instead of zero padding
 
     return kernel, filtered
 
@@ -38,7 +38,7 @@ def sobel(img_in):
     # TODO
     img = np.asarray(img_in, dtype=np.float64)
 
-    sobel_x = np.array(
+    sobel_x = np.array( # first order derivative
         [
             [-1, 0, 1],
             [-2, 0, 2],
@@ -70,8 +70,8 @@ def gradientAndDirection(gx, gy):
     :return: g, theta (np.ndarray, np.ndarray)
     """
     # TODO
-    g = np.hypot(gx, gy).astype(int)
-    theta = np.arctan2(gy, gx)
+    g = np.hypot(gx, gy).astype(int) # gradient magnitude
+    theta = np.arctan2(gy, gx) # gradient direction
     return g, theta
 
 
@@ -82,8 +82,8 @@ def convertAngle(angle):
     :return: nearest match of {0, 45, 90, 135}
     """
     # TODO
-    angle = angle * 180/np.pi
-    angle = np.asarray(angle, dtype=float) % 180
+    angle = angle * 180/np.pi # angle important for knowing which neighbors to compare
+    angle = np.asarray(angle, dtype=float) % 180 # normalise to 180 deg
 
     if angle.ndim == 0:
         a = float(angle)
@@ -114,28 +114,28 @@ def maxSuppress(g, theta):
     theta_q = convertAngle(theta)
     max_sup = np.zeros_like(g)
 
-    h, w = g.shape
+    h, w = g.shape # check whether pixel along gradient direction is maximum
 
-    for i in range(1, h - 1):
+    for i in range(1, h - 1): # for every pixel
         for j in range(1, w - 1):
             direction = theta_q[i, j]
             val = g[i, j]
 
-            if direction == 0: # horizontal comparison
+            if direction == 0: # horizontal comparison (left & right)
                 n1 = g[i, j - 1]
                 n2 = g[i, j + 1]
-            elif direction == 45: # diagonal comparison
+            elif direction == 45: # diagonal comparison 
                 n1 = g[i - 1, j + 1]
                 n2 = g[i + 1, j - 1]
-            elif direction == 90: # vertical comparison
+            elif direction == 90: # vertical comparison (upper & lower)
                 n1 = g[i - 1, j]
                 n2 = g[i + 1, j]
             else:  # 135 # diagonal comparison
                 n1 = g[i - 1, j - 1]
                 n2 = g[i + 1, j + 1]
 
-            if val >= n1 and val >= n2: # is it really maximum compared to neighbours?
-                max_sup[i, j] = val
+            if val >= n1 and val >= n2: # is it really maximum compared to neighbors?
+                max_sup[i, j] = val # if yes keep value
 
     return max_sup
 
@@ -155,13 +155,13 @@ def hysteris(max_sup, t_low, t_high):
     max_sup = np.asarray(max_sup)
     h, w = max_sup.shape
 
-    strong = max_sup >= t_high
-    weak = (max_sup >= t_low) & ~strong
+    strong = max_sup >= t_high # pixel with strong gradient
+    weak = (max_sup >= t_low) & ~strong # pixel with gradient between low & high
 
     result = np.zeros_like(max_sup, dtype=np.uint8)
     result[strong] = 255
 
-    for i in range(1, h - 1):
+    for i in range(1, h - 1): # keep only weak if it contains stron in its neighborhood
         for j in range(1, w - 1):
             if weak[i, j]:
                 if np.any(strong[i - 1:i + 2, j - 1:j + 2]):
@@ -175,7 +175,7 @@ def canny(img):
     kernel, gauss = gaussFilter(img, 5, 2)
 
     # sobel
-    gx, gy = sobel(gauss)
+    gx, gy = sobel(gauss) # calculate sobel with gaussian image
 
     # plotting
     plt.subplot(1, 2, 1)
@@ -217,4 +217,4 @@ if __name__ == '__main__':
     im = Image.open('data/input1.jpg').convert("L")
     result = canny(im)
     out = Image.fromarray(result)
-    out.save('output.png')
+    out.save('output_canny.png')

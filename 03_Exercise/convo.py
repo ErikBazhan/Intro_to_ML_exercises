@@ -4,9 +4,10 @@ import numpy as np
 
 def make_kernel(ksize, sigma):
     # Create a Gaussian kernel of size ksize x ksize
-    kernel = np.zeros((ksize, ksize), dtype=np.float64)
-    center = (ksize - 1) / 2.0
+    kernel = np.zeros((ksize, ksize), dtype=np.float64) # kernel mask
+    center = (ksize - 1) / 2.0 # kernel center
 
+    # weights for sum: at center is highest weight
     for i in range(ksize):
         for j in range(ksize):
             x = i - center
@@ -14,7 +15,7 @@ def make_kernel(ksize, sigma):
             kernel[i, j] = np.exp(-(x * x + y * y) / (2.0 * sigma * sigma))
 
     # Normalize so that the kernel sums to 1
-    kernel = kernel / kernel.sum()
+    kernel = kernel / kernel.sum() # normalize for sustaining image brightness
     return kernel
 
 
@@ -24,9 +25,9 @@ def slow_convolve(arr, k):
     k = np.asarray(k, dtype=np.float64)
 
     # True convolution uses a flipped kernel
-    k = k[::-1, ::-1]
+    k = k[::-1, ::-1] # without flipping: correlation
 
-    kh, kw = k.shape
+    kh, kw = k.shape # kernel height, width
     pad_top = kh // 2
     pad_bottom = (kh - 1) // 2
     pad_left = kw // 2
@@ -43,15 +44,15 @@ def slow_convolve(arr, k):
 
         # Zero padding
         padded = np.zeros((h + pad_top + pad_bottom, w + pad_left + pad_right), dtype=np.float64)
-        padded[pad_top:pad_top + h, pad_left:pad_left + w] = arr
+        padded[pad_top:pad_top + h, pad_left:pad_left + w] = arr # assign 2D array to zero mask
 
         out = np.zeros((h, w), dtype=np.float64)
 
-        for i in range(h):
-            for j in range(w):
+        for i in range(h): # for every pixel in image in y-direction
+            for j in range(w): # for every pixel in image in x-direction
                 value = 0.0
-                for u in range(kh):
-                    for v in range(kw):
+                for u in range(kh): # for every pixel in kernel in y-direction
+                    for v in range(kw): # for every pixel in kernel in x-direction
                         value += k[u, v] * padded[i + u, j + v]
                 out[i, j] = value
 
@@ -62,10 +63,11 @@ def slow_convolve(arr, k):
         h, w, c = arr.shape
         out = np.zeros((h, w, c), dtype=np.float64)
 
-        for ch in range(c):
+        for ch in range(c): # for every channel in image
             channel = arr[:, :, ch]
             padded = np.zeros((h + pad_top + pad_bottom, w + pad_left + pad_right), dtype=np.float64)
-            padded[pad_top:pad_top + h, pad_left:pad_left + w] = channel
+            padded[pad_top:pad_top + h, pad_left:pad_left + w] = channel # assign 3D array to zero mask
+
 
             for i in range(h):
                 for j in range(w):
@@ -81,7 +83,7 @@ def slow_convolve(arr, k):
 
 
 if __name__ == '__main__':
-    k = make_kernel(5, 3)   # todo: find better parameters
+    k = make_kernel(5, 1.5)   # todo: find better parameters
     
     # TODO: chose the image you prefer
     im = np.array(Image.open('data/input1.jpg'))
@@ -99,10 +101,12 @@ if __name__ == '__main__':
     # Unsharp masking:
     # result = input + (input - blurred)
     result = im.astype(np.float64) + (im.astype(np.float64) - blurred)
-
+    # image - blurred enhances sharpness, but also noise (works like highpass filter)
+    # possible solution for noise: factor*(image-blurred) or threshold
+    
     # Clip to valid range and convert back to uint8
     result = np.clip(result, 0, 255).astype(np.uint8)
 
     # Save the result
     out = Image.fromarray(result)
-    out.save('output.png')
+    out.save('output_convo.png')
