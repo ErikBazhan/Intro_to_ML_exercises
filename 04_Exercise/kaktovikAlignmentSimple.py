@@ -7,6 +7,7 @@ Created on 20.06.2025
 import numpy as np
 import cv2
 
+
 # do not import more modules!
 # Use OpenCV only for basic image operations such as resizing and thresholding.
 # Use NumPy for the bounding box computation and for centering the symbol.
@@ -19,39 +20,59 @@ def simpleAlignment(img, size=128):
     """
     if img is None:
         raise ValueError("Input image must not be None.")
-    copy = img.copy()
+    # Ensure grayscale
+    if img.ndim == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
     # Step 1: Resize the input image to a fixed square size.
     # Allowed: cv2.resize.
-    copy = cv2.resize(copy, (size, size))
+    resized = cv2.resize(img, (size, size), interpolation=cv2.INTER_AREA)
+
     # Step 2: Binarize the resized image with Otsu thresholding.
     # Allowed: cv2.threshold with Otsu.
-    _, img_binary = cv2.threshold(copy, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Since the symbol is dark on bright background, use THRESH_BINARY_INV
+    _, binary = cv2.threshold(
+        resized, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+    )
+
     # Step 3: Find the bounding box of the foreground with NumPy only.
     # Hint: The symbols are dark, the background is bright.
     # Allowed: NumPy operations such as argwhere, min, max, slicing.
     # Not allowed: cv2.findContours, connectedComponents, or similar high-level localization helpers.
-    # Dark pixels correspond to the symbol foreground.
-    coords = np.argwhere(img_binary == 0)
+    coords = np.argwhere(binary > 0)
+
+    # Fallback: if no foreground found, return blank canvas
     if coords.size == 0:
-        raise ValueError("No foreground pixels found in the image.")
-    y_min, x_min = coords.min(axis=0) # leftmost and topmost coordinates
-    y_max, x_max = coords.max(axis=0) # rightmost and bottommost coordinates
+        return np.full((size, size), 255, dtype=np.uint8)
+
+    y_min, x_min = coords.min(axis=0)
+    y_max, x_max = coords.max(axis=0)
+
     # Step 4: Crop the grayscale region of interest from the resized image.
     # Use NumPy slicing.
-    copy = copy[y_min:y_max+1, x_min:x_max+1]
-    # Step 5: Resize the cropped region to fit into half the canvas while keeping aspect ratio.
+    roi = resized[y_min:y_max + 1, x_min:x_max + 1]
+
+    # Step 5: Resize the cropped region such that it fits into half the canvas.
     # Allowed: cv2.resize.
-    target = size // 2
-    h, w = copy.shape
-    scale = min(target / float(h), target / float(w))
-    new_h = max(1, int(round(h * scale)))
-    new_w = max(1, int(round(w * scale)))
-    copy = cv2.resize(copy, (new_w, new_h))
+    target_max = size // 2
+    roi_h, roi_w = roi.shape[:2]
+
+    if roi_h == 0 or roi_w == 0:
+        return np.full((size, size), 255, dtype=np.uint8)
+
+    scale = min(target_max / roi_h, target_max / roi_w)
+    new_w = max(1, int(round(roi_w * scale)))
+    new_h = max(1, int(round(roi_h * scale)))
+
+    symbol = cv2.resize(roi, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
     # Step 6: Place the resized symbol in the center of a blank canvas.
     # Use NumPy indexing and array assignment for centering.
-    canvas = np.full((size, size), 0, dtype=np.uint8) # white canvas
-    y_offset = (size - copy.shape[0]) // 2
-    x_offset = (size - copy.shape[1]) // 2
-    canvas[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = copy
-    return canvas
+    canvas = np.full((size, size), 255, dtype=np.uint8)
 
+    y0 = (size - new_h) // 2
+    x0 = (size - new_w) // 2
+
+    canvas[y0:y0 + new_h, x0:x0 + new_w] = symbol
+
+    return canvas

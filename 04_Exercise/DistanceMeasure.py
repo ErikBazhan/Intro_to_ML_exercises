@@ -33,5 +33,7 @@ def euclideanDistance(featureA, featureB):
     # TODO: implement the Euclidean distance formula yourself with NumPy operations.
     # Allowed: subtraction, squaring, sum, and sqrt.
     # Not allowed: external metric/distance helpers from scipy, sklearn, cv2, etc.
-    return np.sqrt(np.sum((featureA - featureB) ** 2))
+    diff = featureA.astype(np.float32) - featureB.astype(np.float32)
+    distance = np.sqrt(np.sum(diff ** 2))
+    return float(distance)
   

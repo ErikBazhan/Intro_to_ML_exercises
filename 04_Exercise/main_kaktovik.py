@@ -215,3 +215,20 @@ axs[1, 3].imshow(simpleAlignment(rotated), cmap="gray"); axs[1, 3].set_title("Al
 
 plt.tight_layout()
 plt.show()
+
+# 1.:
+# The preprocessing step mainly compensates for translation by centering the foreground symbol on a fixed canvas.
+# As a result, aligned symbols become less sensitive to positional shifts. Rotation, however, is not corrected by the alignment procedure
+# and still has a strong influence on both descriptors.
+
+# 2.:
+# Compared to MSE, HOG is substantially more robust because it captures local edge orientations instead of exact pixel values.
+# MSE is highly sensitive to even small geometric changes, while HOG better preserves similarity across different writers and minor variations.
+
+# 3.:
+# After alignment the descriptor remains sensitive to rotation, stroke thickness and shape variations.
+
+# 4.:
+# Retrieval on artificially transformed queries is improved by alignment for translated symbols, but rotated queries remain more difficult.
+# Compared to the already aligned gallery, transformed queries still achieve correct matches in the top ranks,
+# yet with more degraded similarity scores than untransformed gallery images.
