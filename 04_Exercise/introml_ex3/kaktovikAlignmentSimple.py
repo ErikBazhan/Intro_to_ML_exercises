@@ -7,6 +7,7 @@ Created on 20.06.2025
 import numpy as np
 import cv2
 
+
 # do not import more modules!
 # Use OpenCV only for basic image operations such as resizing and thresholding.
 # Use NumPy for the bounding box computation and for centering the symbol.
@@ -22,7 +23,6 @@ def simpleAlignment(img, size=128):
     # Ensure grayscale
     if img.ndim == 3:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
 
     # Step 1: Resize the input image to a fixed square size.
     # Allowed: cv2.resize.
@@ -44,7 +44,7 @@ def simpleAlignment(img, size=128):
     # Fallback: if no foreground found, return blank canvas
     if coords.size == 0:
         return np.full((size, size), 255, dtype=np.uint8)
-    
+
     y_min, x_min = coords.min(axis=0)
     y_max, x_max = coords.max(axis=0)
 
@@ -64,7 +64,7 @@ def simpleAlignment(img, size=128):
     new_w = max(1, int(round(roi_w * scale)))
     new_h = max(1, int(round(roi_h * scale)))
 
-    symbol = cv2.resize(roi, (new_w, new_h), interpolation=cv2.INTER_AREA)    
+    symbol = cv2.resize(roi, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
     # Step 6: Place the resized symbol in the center of a blank canvas.
     # Use NumPy indexing and array assignment for centering.

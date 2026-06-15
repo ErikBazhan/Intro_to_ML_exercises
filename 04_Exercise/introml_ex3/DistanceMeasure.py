@@ -20,8 +20,7 @@ def mseDistance(imgA, imgB):
     # Allowed: astype, subtraction, squaring, mean, or an explicit sum divided by the number of pixels.
     # Not allowed: external metric/distance helpers from scipy, sklearn, cv2, etc.
     diff = imgA.astype(np.float32) - imgB.astype(np.float32)
-    mse = np.mean(diff ** 2)
-    return float(mse)
+    return float(np.mean(diff * diff))
 
 
 def euclideanDistance(featureA, featureB):
@@ -37,3 +36,4 @@ def euclideanDistance(featureA, featureB):
     diff = featureA.astype(np.float32) - featureB.astype(np.float32)
     distance = np.sqrt(np.sum(diff ** 2))
     return float(distance)
+  

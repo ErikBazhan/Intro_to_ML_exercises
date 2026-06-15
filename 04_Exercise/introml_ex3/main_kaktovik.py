@@ -217,8 +217,8 @@ plt.tight_layout()
 plt.show()
 
 # 1.:
-# The preprocessing step mainly compensates for translation by centering the foreground symbol on a fixed canvas. 
-# As a result, aligned symbols become less sensitive to positional shifts. Rotation, however, is not corrected by the alignment procedure 
+# The preprocessing step mainly compensates for translation by centering the foreground symbol on a fixed canvas.
+# As a result, aligned symbols become less sensitive to positional shifts. Rotation, however, is not corrected by the alignment procedure
 # and still has a strong influence on both descriptors.
 
 # 2.:
@@ -230,5 +230,5 @@ plt.show()
 
 # 4.:
 # Retrieval on artificially transformed queries is improved by alignment for translated symbols, but rotated queries remain more difficult.
-# Compared to the already aligned gallery, transformed queries still achieve correct matches in the top ranks, 
+# Compared to the already aligned gallery, transformed queries still achieve correct matches in the top ranks,
 # yet with more degraded similarity scores than untransformed gallery images.
