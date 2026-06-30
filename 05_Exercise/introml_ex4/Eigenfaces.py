@@ -17,18 +17,18 @@ TRAINED_STANDARDIZATION = {}
 
 
 def _build_classifier(classifier_type):
-    if classifier_type == "logistic":
+    if classifier_type == "logistic": # Logistic Regression
         return LogisticRegression(max_iter=2000)
-    if classifier_type == "gaussian_nb":
+    if classifier_type == "gaussian_nb": # Gaussian Naive Bayes
         return GaussianNB()
     raise ValueError(f"Unknown classifier type: {classifier_type}")
 
 
-def _uses_feature_scaling(classifier_type):
-    return classifier_type == "logistic"
+def _uses_feature_scaling(classifier_type): 
+    return classifier_type == "logistic" #Logistic Regression needs normalized PCA coordinates
+                                         # Gaussian NB uses PCA features directly
 
-
-def _list_class_directories(dataset_root):
+def _list_class_directories(dataset_root): # Capture all classes
     dataset_root = Path(dataset_root)
     if not dataset_root.exists():
         raise FileNotFoundError(f"Dataset root does not exist: {dataset_root}")
@@ -42,7 +42,7 @@ def _list_class_directories(dataset_root):
     return class_dirs
 
 
-def create_database_from_folder(dataset_root, image_size=(N, N)):
+def create_database_from_folder(dataset_root, image_size=(N, N)): # Load images from classes and make matrix
     """
     Load a local image dataset from class subdirectories.
 
@@ -84,7 +84,7 @@ def create_database_from_folder(dataset_root, image_size=(N, N)):
                     f"Expected {(target_width, target_height)}, got {(img.shape[1], img.shape[0])} from {image_path}."
                 )
 
-            train.append(img.reshape(-1).astype(np.float64))
+            train.append(img.reshape(-1).astype(np.float64)) # 1D vector
             labels.append(class_dir.name)
 
     if not train:
@@ -105,7 +105,7 @@ def calculate_eigenfaces(train, avg, num_eigenfaces):
     """
     Calculate the principal directions of the centered training set using SVD.
     """
-    U, S, Vt = np.linalg.svd(train - avg, full_matrices=False) 
+    U, S, Vt = np.linalg.svd(train - avg, full_matrices=False) # Singular value decomposition of data in direction of max. variance
     # U contains the left singular vectors (eigenfaces), S contains the singular values, and Vt contains the right singular vectors.
     
     return Vt[:num_eigenfaces] # Return the first num_eigenfaces principal components (eigenfaces).
