@@ -167,3 +167,7 @@ def main(k_test_samples=None, random_state=0):
 
 if __name__ == "__main__":
     main()
+
+# Euclidean and cosine distance behaved similarly, but Euclidean was slightly better.
+# NBNN performed noticeably better than KNN by about 4–5 percentage points.
+# Logistic Regression worked best, with 90.39% accuracy. But takes signficantly longer to train than the other methods (over a Minute vs seconds).

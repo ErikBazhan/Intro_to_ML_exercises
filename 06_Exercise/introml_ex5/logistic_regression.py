@@ -26,7 +26,20 @@ class LogisticRegressionClassifier:
         """
         if LogisticRegression is None:
             raise ImportError("scikit-learn is required for LogisticRegressionClassifier.")
-        pass
+        # Convert X and y to NumPy arrays
+        X = np.asarray(X)
+        y = np.asarray(y)
+        # Validate shapes
+        if X.ndim != 2:
+            raise ValueError("X must have shape (n_samples, n_features)")
+        if y.ndim != 1:
+            raise ValueError("y must be one-dimensional")
+        if len(X) != len(y):
+            raise ValueError("X and y must have the same number of samples")
+        # Create and fit the logistic regression model
+        self.model = LogisticRegression(max_iter=self.max_iter, random_state=self.random_state)
+        self.model.fit(X, y)
+        return self
 
     def predict(self, X):
         """
@@ -38,4 +51,11 @@ class LogisticRegressionClassifier:
             - validate the feature dimension
             - return the model predictions as a NumPy array
         """
-        pass
+        if self.model is None:
+            raise ValueError("fit() must be called before predict().")
+        X = np.asarray(X)
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+        if X.shape[1] != self.model.coef_.shape[1]:
+            raise ValueError(f"Expected input with {self.model.coef_.shape[1]} features, got {X.shape[1]}")
+        return self.model.predict(X)
